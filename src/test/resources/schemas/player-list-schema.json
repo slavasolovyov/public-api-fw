@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Player List Response Schema",
+  "description": "Schema for a response containing a list of players",
+  "type": "object",
+  "required": ["players"],
+  "properties": {
+    "players": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "screenName", "gender", "age"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "screenName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "gender": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
+
