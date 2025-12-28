@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeSuite;
 
 
-public class BaseTest {
+public abstract class BaseTest {
     protected static final Logger logger = LoggerFactory.getLogger(BaseTest.class);
 
     @BeforeSuite
