@@ -5,6 +5,7 @@ import com.api.framework.enums.Gender;
 import com.api.framework.enums.Roles;
 import com.api.framework.facade.PlayerFacade;
 import com.api.framework.model.*;
+import com.api.framework.utils.PlayerTestDataBuilder;
 import com.api.framework.utils.TestDataFactory;
 import com.api.framework.utils.TokenStorage;
 import io.qameta.allure.*;
@@ -31,13 +32,14 @@ public class PlayerControllerPositiveTests extends BaseTest {
         String password = TestDataFactory.randomNumericPassword(7);
         Integer age = TestDataFactory.getMaxValidAge();
         String gender = Gender.MALE.getValue();
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", gender,
-                "login", login,
-                "password", password,
-                "role", Roles.USER.getValue(),
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withScreenName(screenName)
+                .withLogin(login)
+                .withPassword(password)
+                .withAge(age)
+                .withGender(gender)
+                .withRole(Roles.USER)
+                .build();
         PlayerCreateResponse response = PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
 
         SoftAssert soft = new SoftAssert();
@@ -55,16 +57,9 @@ public class PlayerControllerPositiveTests extends BaseTest {
     @Test(dataProvider = "ageProvider", description = "Verify user can be created with valid age")
     @Severity(SeverityLevel.CRITICAL)
     public void createPlayerWithValidAge(Integer age) {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
-        String password = TestDataFactory.randomNumericPassword(7);
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", Gender.FEMALE.getValue(),
-                "login", login,
-                "password", password,
-                "role", Roles.USER.getValue(),
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withAge(age)
+                .build();
         PlayerCreateResponse response = PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         Assert.assertNotNull(response.getId());
     }
@@ -80,16 +75,10 @@ public class PlayerControllerPositiveTests extends BaseTest {
     @Test(dataProvider = "passwordProvider", description = "Verify user can be created with valid password length")
     @Severity(SeverityLevel.CRITICAL)
     public void createPlayerWithValidPasswordLength(String password) {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
-        int age = TestDataFactory.getMaxValidAge();
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", Gender.MALE.getValue(),
-                "login", login,
-                "password", password,
-                "role", Roles.USER.getValue(),
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withAge(TestDataFactory.getMaxValidAge())
+                .withPassword(password)
+                .build();
         PlayerCreateResponse response = PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         Assert.assertNotNull(response.getId());
     }
@@ -106,18 +95,7 @@ public class PlayerControllerPositiveTests extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     @Issue("TMS-0006") //Get deleted player by id return 200
     public void deletePlayer() {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
-        String password = TestDataFactory.randomAlphabeticPassword(7);
-        Integer age = TestDataFactory.getMinValidAge();
-
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", Gender.MALE.getValue(),
-                "login", login,
-                "password", password,
-                "role", Roles.USER.getValue(),
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer().build();
         PlayerCreateResponse response = PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         Integer playerId = response.getId();
         PlayerFacade.deletePlayerById(TokenStorage.getToken(Roles.SUPERVISOR), response.getId());
@@ -136,13 +114,14 @@ public class PlayerControllerPositiveTests extends BaseTest {
         String gender = Gender.MALE.getValue();
         String role = Roles.ADMIN.getValue();
 
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", gender,
-                "login", login,
-                "password", password,
-                "role", role,
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withScreenName(screenName)
+                .withLogin(login)
+                .withPassword(password)
+                .withAge(age)
+                .withGender(gender)
+                .withRole(role)
+                .build();
         PlayerCreateResponse response = PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         Integer playerId = response.getId();
         PlayerGetByPlayerIdResponse playerByIdResponse = PlayerFacade.getPlayerById(playerId);
@@ -170,20 +149,10 @@ public class PlayerControllerPositiveTests extends BaseTest {
     @Test(description = "Verify getting all players return just created player")
     @Severity(SeverityLevel.CRITICAL)
     public void createAndGetAllPlayers() {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
-        String password = TestDataFactory.randomAlphabeticPassword(5);
-        Integer age = TestDataFactory.getMinValidAge();
-        String gender = Gender.MALE.getValue();
-        String role = Roles.ADMIN.getValue();
-
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", gender,
-                "login", login,
-                "password", password,
-                "role", role,
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withPassword(TestDataFactory.randomAlphabeticPassword(5))
+                .withRole(Roles.ADMIN)
+                .build();
         PlayerCreateResponse response = PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         Integer playerId = response.getId();
         PlayerGetAllResponse allPlayers = PlayerFacade.getAllPlayers();
@@ -195,20 +164,7 @@ public class PlayerControllerPositiveTests extends BaseTest {
     @Test(description = "Verify player update")
     @Severity(SeverityLevel.CRITICAL)
     public void updatePlayer() {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
-        String password = TestDataFactory.randomAlphabeticPassword(7);
-        Integer age = TestDataFactory.getMinValidAge();
-        String gender = Gender.MALE.getValue();
-        String role = Roles.USER.getValue();
-
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", gender,
-                "login", login,
-                "password", password,
-                "role", role,
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer().build();
         PlayerCreateResponse response = PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         Integer playerId = response.getId();
 
@@ -225,13 +181,9 @@ public class PlayerControllerPositiveTests extends BaseTest {
         String login = TestDataFactory.randomLogin();
         String newGenderValue = Gender.FEMALE.getValue();
 
-        Map<String, Object> queryParams = Map.of(
-                "age", TestDataFactory.getMinValidAge(),
-                "gender", Gender.MALE.getValue(),
-                "login", login,
-                "password", TestDataFactory.randomAlphabeticPassword(7),
-                "role", Roles.USER.getValue(),
-                "screenName", TestDataFactory.randomScreenName());
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withLogin(login)
+                .build();
 
         PlayerCreateResponse response = PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         Integer userPlayerId = response.getId();

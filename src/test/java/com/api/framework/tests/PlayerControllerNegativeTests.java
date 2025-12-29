@@ -5,6 +5,7 @@ import com.api.framework.enums.Gender;
 import com.api.framework.enums.Roles;
 import com.api.framework.facade.PlayerFacade;
 import com.api.framework.model.PlayerCreateResponse;
+import com.api.framework.utils.PlayerTestDataBuilder;
 import com.api.framework.utils.TestDataFactory;
 import com.api.framework.utils.TokenStorage;
 import io.qameta.allure.*;
@@ -23,22 +24,12 @@ public class PlayerControllerNegativeTests extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void userNotAbleToCreateNewPlayer() {
         String editorLogin = TestDataFactory.randomLogin();
-        Map<String, Object> queryParams = Map.of(
-                "age", TestDataFactory.getMinValidAge(),
-                "gender", Gender.MALE.getValue(),
-                "login", editorLogin,
-                "password", TestDataFactory.randomAlphabeticPassword(7),
-                "role", Roles.USER.getValue(),
-                "screenName", TestDataFactory.randomScreenName());
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withLogin(editorLogin)
+                .build();
         PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
 
-        queryParams = Map.of(
-                "age", TestDataFactory.getMinValidAge(),
-                "gender", Gender.MALE.getValue(),
-                "login", TestDataFactory.randomLogin(),
-                "password", TestDataFactory.randomAlphabeticPassword(7),
-                "role", Roles.USER.getValue(),
-                "screenName", TestDataFactory.randomScreenName());
+        queryParams = PlayerTestDataBuilder.defaultPlayer().build();
 
         ValidatableResponse response = PlayerFacade.createPlayerWithValidatableResponse(editorLogin, queryParams);
         int statusCode = response.extract().statusCode();
@@ -49,17 +40,9 @@ public class PlayerControllerNegativeTests extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     @Issue("TMS-0003") // Player with age > 59 && age < 17 allowed to be created but should not
     public void createPlayerWithInvalidAge(Integer age) {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
-        String password = TestDataFactory.randomAlphabeticPassword(7);
-
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", Gender.MALE.getValue(),
-                "login", login,
-                "password", password,
-                "role", Roles.USER.getValue(),
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withAge(age)
+                .build();
 
         ValidatableResponse response = PlayerFacade.createPlayerWithValidatableResponse(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         int statusCode = response.extract().statusCode();
@@ -76,18 +59,10 @@ public class PlayerControllerNegativeTests extends BaseTest {
 
     @Test(description = "Create player with invalid role")
     public void createPlayerWithInvalidRole() {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
-        String password = TestDataFactory.randomAlphabeticPassword(7);
         String invalidRole = "Test";
-        Integer age = TestDataFactory.getMinValidAge();
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", Gender.MALE.getValue(),
-                "login", login,
-                "password", password,
-                "role", invalidRole,
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withRole(invalidRole)
+                .build();
 
         ValidatableResponse response = PlayerFacade.createPlayerWithValidatableResponse(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         int statusCode = response.extract().statusCode();
@@ -98,18 +73,7 @@ public class PlayerControllerNegativeTests extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     @Issue("TMS-0002") //missing validation on required password field
     public void createPlayerWithMissingRequiredField() {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
-        String password = TestDataFactory.randomAlphabeticPassword(7);
-        Integer age = TestDataFactory.getMinValidAge();
-
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", Gender.MALE.getValue(),
-                "login", login,
-                "password", password,
-                "role", Roles.USER.getValue(),
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer().build();
 
         ValidatableResponse response = PlayerFacade.createPlayerWithValidatableResponse(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         int statusCode = response.extract().statusCode();
@@ -120,19 +84,10 @@ public class PlayerControllerNegativeTests extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     @Issue("TMS-0001")
     public void createPlayerWithInvalidGender() {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
-        String password = TestDataFactory.randomAlphabeticPassword(7);
-        Integer age = TestDataFactory.getMinValidAge();
         String invalidGender = "Other";
-
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", invalidGender,
-                "login", login,
-                "password", password,
-                "role", Roles.USER.getValue(),
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withGender(invalidGender)
+                .build();
 
         ValidatableResponse response = PlayerFacade.createPlayerWithValidatableResponse(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         int statusCode = response.extract().statusCode();
@@ -144,18 +99,10 @@ public class PlayerControllerNegativeTests extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     @Issue("TMS-0004")// No validation on contain latin letters and numbers (min 7 max 15 characters)
     public void createPlayerWithInvalidPasswordLength(Integer length) {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
         String password = TestDataFactory.randomNumericPassword(length);
-        Integer age = TestDataFactory.getMinValidAge();
-
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", Gender.MALE.getValue(),
-                "login", login,
-                "password", password,
-                "role", Roles.USER.getValue(),
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withPassword(password)
+                .build();
 
         ValidatableResponse response = PlayerFacade.createPlayerWithValidatableResponse(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         int statusCode = response.extract().statusCode();
@@ -174,18 +121,9 @@ public class PlayerControllerNegativeTests extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     @Issue("TMS-0005")// Allow to use duplicate login, screenName. Previous Entity will be updated
     public void createPlayerWithDuplicateFields() {
-        String screenName = TestDataFactory.randomScreenName();
-        String login = TestDataFactory.randomLogin();
-        String password = TestDataFactory.randomAlphabeticPassword(7);
-        Integer age = TestDataFactory.getMinValidAge();
-
-        Map<String, Object> queryParams = Map.of(
-                "age", age,
-                "gender", Gender.FEMALE.getValue(),
-                "login", login,
-                "password", password,
-                "role", Roles.USER.getValue(),
-                "screenName", screenName);
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withGender(Gender.FEMALE)
+                .build();
 
         PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         ValidatableResponse response = PlayerFacade.createPlayerWithValidatableResponse(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
@@ -197,24 +135,14 @@ public class PlayerControllerNegativeTests extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     @Issue("TMS-0006")// Player able to delete other player
     public void deleteOtherUser() {
-        Map<String, Object> queryParams = Map.of(
-                "age", TestDataFactory.getMinValidAge(),
-                "gender", Gender.MALE.getValue(),
-                "login", TestDataFactory.randomLogin(),
-                "password", TestDataFactory.randomAlphabeticPassword(7),
-                "role", Roles.USER.getValue(),
-                "screenName", TestDataFactory.randomScreenName());
+        Map<String, Object> queryParams = PlayerTestDataBuilder.defaultPlayer().build();
         PlayerCreateResponse response = PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         Integer firstPlayerId = response.getId();
 
         String secondPlayerLogin = TestDataFactory.randomLogin();
-        queryParams = Map.of(
-                "age", TestDataFactory.getMinValidAge(),
-                "gender", Gender.MALE.getValue(),
-                "login", secondPlayerLogin,
-                "password", TestDataFactory.randomAlphabeticPassword(7),
-                "role", Roles.USER.getValue(),
-                "screenName", TestDataFactory.randomScreenName());
+        queryParams = PlayerTestDataBuilder.defaultPlayer()
+                .withLogin(secondPlayerLogin)
+                .build();
         PlayerFacade.createPlayer(TokenStorage.getToken(Roles.SUPERVISOR), queryParams);
         PlayerFacade.deletePlayerById(secondPlayerLogin, firstPlayerId, HttpStatus.SC_FORBIDDEN);
     }
